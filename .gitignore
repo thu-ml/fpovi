@@ -1,0 +1,8 @@
+run/
+*.sw*
+.vscode/*
+**/__pycache__/
+data/*
+.*
+**/train_log/
+*.npz
