@@ -1,5 +1,5 @@
 """
-Random hack. Code baesd on Qiang Liu's original repo.
+Code baesd on Qiang Liu's original repo.
 """
 import tensorflow as tf
 import zhusuan as zs
@@ -64,16 +64,24 @@ def param_dist(buf, dist_type):
     return tf.convert_to_tensor(tf.nn.moments(k, axes=[0]))
 
 
-def _svgd_stationary(n_particles, log_lhood, params, kernel,
+def _svgd_stationary(n_particles, log_joint, params, kernel,
                      replace_grad=None, additional_grad=None, profile=False,
                      method='svgd'):
+    """
+    POVI using a stationary kernel.
+    :param log_joint: tensor representing the log joint density. Alternatively,
+                      you can provide its gradient through the `replace_grad`
+                      and `additional_grad` arguments.
+    :param params: model parameters
+    :param method: POVI method to use
+    """
     params_squeezed = _squeeze(params, n_particles)
     Kxy, dykxy = kernel(params_squeezed, tf.stop_gradient(params_squeezed))
 
     # We want dykxy[x] := sum_y\frac{\partial K(x,y)}{\partial y}
-    # tf does not support Jacobian, and tf.gradients(Kxy, theta) returns
+    # tf does not support Jacobian, and tf.gradients(Kxy, theta) returns 
     # ret[x] = \sum_y\frac{\partial K(x,y)}{\partial x}
-    # For stationary kernel ret = -dykxy.
+    # For stationary kernel we have dykxy = -ret. 
     if dykxy is None:
         dykxy = -tf.gradients(Kxy, params_squeezed)[0]
     else:
@@ -81,7 +89,7 @@ def _svgd_stationary(n_particles, log_lhood, params, kernel,
         dykxy = dykxy(Kxy, params_squeezed)
 
     if replace_grad is None:
-        grads = tf.gradients(log_lhood, params)
+        grads = tf.gradients(log_joint, params)
     else:
         grads = replace_grad
     if additional_grad is not None:
@@ -157,15 +165,15 @@ def stein_variational_gradient_stationary(
     observed = observed.copy()
     observed.update(latent)
     bn, _ = forward_model.observe(**observed)
-    log_lhood = bn.log_joint()
+    log_joint = bn.log_joint()
 
     grad_and_vars = _svgd_stationary(
-        n_particles, log_lhood, var_list, kernel, method=method, profile=profile)
+        n_particles, log_joint, var_list, kernel, method=method, profile=profile)
     return grad_and_vars, bn
 
 
 
-def svgd_act_kernel(n_particles, log_lhood, all_activations, params,
+def svgd_act_kernel(n_particles, log_joint, all_activations, params,
                     kernel_type):
     if kernel_type == 'cosine' or kernel_type.find('norm') != -1:
         sys.stderr.write("Using normalized activation\n")
@@ -211,7 +219,7 @@ def svgd_act_kernel(n_particles, log_lhood, all_activations, params,
             grad_lists[i].append(tf.reduce_sum(g, axis=0, keepdims=True))
     grad_y_Kxys = [tf.concat(gl, axis=0) for gl in grad_lists]
 
-    grad_ll = tf.gradients(log_lhood, params)
+    grad_ll = tf.gradients(log_joint, params)
     grads = [(g1 + g2) / tf.cast(n_particles, tf.float32)
              for g1, g2 in zip(grad_y_Kxys, grad_ll)]
 
@@ -235,9 +243,9 @@ def stein_variational_gradient_act_kernel(
     observed = observed.copy()
     observed.update(latent)
     bn, all_activations = forward_model.observe(**observed)
-    log_lhood = bn.log_joint()
+    log_joint = bn.log_joint()
 
     grad_and_vars = svgd_act_kernel(
-        n_particles, log_lhood, all_activations, var_list, kernel_type)
+        n_particles, log_joint, all_activations, var_list, kernel_type)
     return grad_and_vars, bn
 
