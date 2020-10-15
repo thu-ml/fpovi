@@ -4,6 +4,8 @@ Code for *Function Space Particle Optimization for Bayesian Neural Networks*, IC
 
 Please reach out at <wzy196@gmail.com> for questions.
 
+*For an imperative implementation, check out the [tf2 branch](https://github.com/thu-ml/fpovi/tree/tf2).*
+
 ## Dependencies
 
 - requirements.txt
@@ -29,11 +31,11 @@ This repository contains code adapted from other sources:
 
 ```
 @inproceedings{
-wang2018function,
-title={Function Space Particle Optimization for Bayesian Neural Networks},
-author={Ziyu Wang and Tongzheng Ren and Jun Zhu and Bo Zhang},
-booktitle={International Conference on Learning Representations},
-year={2019},
-url={https://openreview.net/forum?id=BkgtDsCcKQ},
+    wang2018function,
+    title={Function Space Particle Optimization for {B}ayesian Neural Networks},
+    author={Ziyu Wang and Tongzheng Ren and Jun Zhu and Bo Zhang},
+    booktitle={International Conference on Learning Representations},
+    year={2019},
+    url={https://openreview.net/forum?id=BkgtDsCcKQ},
 }
 ```
