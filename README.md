@@ -1,5 +1,9 @@
 # f-POVI
 
+<p align="center">
+<img src="http://ml.cs.tsinghua.edu.cn/~ziyu/static/fpovi/i.gif" width="500">
+</p>
+
 Code for *Function Space Particle Optimization for Bayesian Neural Networks*, ICLR 2019.
 
 Please reach out at <wzy196@gmail.com> for questions.
