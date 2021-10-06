@@ -66,15 +66,18 @@ class SGDTrainer(Trainer):
         for net in self.nets:
             with tf.GradientTape() as g:
                 pred = net(x_mb)
+                reg_loss = 0
                 with g.stop_recording():
                     with tf.GradientTape() as h:
                         h.watch(pred)
                         nll = -self.recon_likelihood(pred, y_mb)
                         nll = tf.reduce_sum(tf.reduce_mean(nll, axis=0))
-                        nlj = nll + self.get_regularizer(net)
+                        reg_loss += self.get_regularizer(net)
                         fs_grad, sd_grad = h.gradient(nll * self.args.lh_scale, (pred, self._y_sd_raw))
                         sds.append(sd_grad)
                 ws_grads = g.gradient(pred, net.variables, output_gradients=fs_grad)
+                ws_grads_reg = g.gradients(reg_loss, net.variables)
+                ws_grads = [a+b for a,b in zip(ws_grads, ws_grads_reg)]
             grad_and_vars += list(zip(ws_grads, net.variables))
         # optimize y_sd. Not checked
         grad_and_vars += [(tf.reduce_mean(sds), self._y_sd_raw)]
