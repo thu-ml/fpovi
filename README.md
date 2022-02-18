@@ -8,7 +8,7 @@ Code for *Function Space Particle Optimization for Bayesian Neural Networks*, IC
 
 Please reach out at <wzy196@gmail.com> for questions.
 
-*For an imperative implementation, check out the [tf2 branch](https://github.com/thu-ml/fpovi/tree/tf2).*
+*For an imperative implementation, check out the [tf2 branch](https://github.com/thu-ml/fpovi/tree/tf2), or a [JAX version](https://github.com/yardenas/probabilistic-regression/blob/main/f_povi.py) by [@yardenas](https://github.com/yardenas/)*.
 
 ## Dependencies
 
